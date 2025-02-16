@@ -1,11 +1,15 @@
 import socket
 import sys
+from datetime import datetime
 
 def send_log_message(host, port):
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_ip = socket.gethostbyname(socket.gethostname())
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
     client_socket.connect((host, port))
     print("Connected to logging server.")
-    
+
 while True:
     message = input("Enter log message: ")
     if message.lower() == 'exit':
