@@ -15,8 +15,11 @@ while True:
     if message.lower() == 'exit':
         print("Closing connection.")
         break
-    client_socket.sendall(message.encode('utf-8'))
 
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    formatted_message = f"[{timestamp}] {client_ip}: {message}"
+    client_socket.sendall(formatted_message.encode('utf-8'))
+    
 if __name__ == "__main__":
     host = sys.argv[1]
     port = int(sys.argv[2])
