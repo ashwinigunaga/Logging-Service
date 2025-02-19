@@ -38,7 +38,7 @@ public class LoggingService{
             while ((message = reader.readLine()) != null) {
                 if ("CLIENT_DISCONNECT".equals(message)) {
                     System.out.println("Client " + clientAddress + " disconnected.");
-                    logMessage(clientAddress, "Client disconnected", logFilePath, logFormat);
+                    logMessage(clientAddress, "Client " + clientAddress + " disconnected.", logFilePath, logFormat);
                     break;
                 }
                logMessage(clientAddress, message, logFilePath, logFormat);
@@ -55,7 +55,7 @@ public class LoggingService{
                             .replace("{client}", clientAddress);
                             
         
-        System.out.println(logEntry);
+        //System.out.println(logEntry);
         
         try (FileWriter writer = new FileWriter(logFilePath, true)) {
             writer.write(logEntry + "\n");
