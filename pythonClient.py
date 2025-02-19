@@ -20,7 +20,7 @@ def send_log_message(host, port, log_format, message=None):
                  formatted_message = formatted_message.replace("{message}", message)
                 
                  client_socket.sendall(formatted_message.encode('utf-8') + b'\n')
-                 print("Test log message sent successfully.")
+                 #print("Test log message sent successfully.")
                  return formatted_message
              
              while True:
@@ -60,6 +60,13 @@ def test_logging_service(host, port, log_format, log_file):
     else:
         print("Test failed: Log entry not found.")
 
+def test_rate_limit(host, port, log_format, request_count, delay_between_requests):
+    print("Starting rate limit test...")
+    for i in range(request_count):
+        send_log_message(host, port, log_format, f"Test message {i+1}")
+        time.sleep(delay_between_requests)
+    print("Rate limit test completed. Check server logs to verify rate limiting behavior.")
+
 if __name__ == "__main__":
     if len(sys.argv) < 4:
         print("Usage: python test_client.py <host> <port> <logFormat> [auto/rate (optional)]")
@@ -72,5 +79,7 @@ if __name__ == "__main__":
 
     if len(sys.argv) > 4 and sys.argv[4].lower() == "auto":
         test_logging_service(host, port, log_format, log_file)
+    elif len(sys.argv) > 4 and sys.argv[4].lower() == "rate":
+        test_rate_limit(host, port, log_format, request_count=10, delay_between_requests=0.01)
     else:
         send_log_message(host, port, log_format)

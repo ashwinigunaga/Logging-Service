@@ -48,6 +48,7 @@ public class LoggingService{
                     logMessage(clientAddress, message, logFilePath, logFormat);
                 } else {
                     System.out.println("Rate limit exceeded for client: " + clientAddress);
+                    logMessage(clientAddress, "Rate limit exceeded for client: " + clientAddress, logFilePath, logFormat);
                 }            }
         } catch (IOException e) {
             System.err.println("Error handling client: " + e.getMessage());
