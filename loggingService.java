@@ -38,13 +38,29 @@ public class LoggingService{
             while ((message = reader.readLine()) != null) {
                 if ("CLIENT_DISCONNECT".equals(message)) {
                     System.out.println("Client " + clientAddress + " disconnected.");
-                    //logMessage(clientAddress, "Client disconnected", logFilePath, logFormat);
+                    logMessage(clientAddress, "Client disconnected", logFilePath, logFormat);
                     break;
                 }
-               // logMessage(clientAddress, message, logFilePath, logFormat);
+               logMessage(clientAddress, message, logFilePath, logFormat);
             }
         } catch (IOException e) {
             System.err.println("Error handling client: " + e.getMessage());
+        }
+    }
+
+    private static void logMessage(String clientAddress, String message, String logFilePath, String logFormat) {
+        String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+ 
+        String logEntry = message.replace("{timestamp}", timestamp)
+                            .replace("{client}", clientAddress);
+                            
+        
+        System.out.println(logEntry);
+        
+        try (FileWriter writer = new FileWriter(logFilePath, true)) {
+            writer.write(logEntry + "\n");
+        } catch (IOException e) {
+            System.err.println("Error writing log: " + e.getMessage());
         }
     }
 }
