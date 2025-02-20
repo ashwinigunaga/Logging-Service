@@ -10,13 +10,13 @@ public class LoggingService{
     private static final long GLOBAL_RATE_LIMIT = 1_00; // 1 log 0.1 second
     private static final Map<String, Long> clientTimestamps = new ConcurrentHashMap<>();
     public static void main(String[] args) {
-        if (args.length < 2) {
+        if (args.length < 3) {
             System.out.println("Usage: java LoggingService <port> <logFilePath> <logFormat>");
             return;
         }
         int port = Integer.parseInt(args[0]);
         String logFilePath = args[1];
-        String logFormat = "";
+        String logFormat = args[2];
 
         ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
 
@@ -44,10 +44,10 @@ public class LoggingService{
                     break;
                 }
                 if (allowGlobalRateLimit(clientAddress)) {
-                    System.out.println("within limit");
+                   // System.out.println("within limit");
                     logMessage(clientAddress, message, logFilePath, logFormat);
                 } else {
-                    System.out.println("Rate limit exceeded for client: " + clientAddress);
+                    //System.out.println("Rate limit exceeded for client: " + clientAddress);
                     logMessage(clientAddress, "Rate limit exceeded for client: " + clientAddress, logFilePath, logFormat);
                 }            }
         } catch (IOException e) {
@@ -62,17 +62,20 @@ public class LoggingService{
 
     private static void logMessage(String clientAddress, String message, String logFilePath, String logFormat) {
         String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
- 
-        String logEntry = message.replace("{timestamp}", timestamp)
-                            .replace("{client}", clientAddress);
+        String logEntry;
+        logEntry = logFormat.replace("{timestamp}", timestamp)
+                            .replace("{client}", clientAddress)
+                            .replace("{message}", message);
+
                             
-        
+
         //System.out.println(logEntry);
         
         try (FileWriter writer = new FileWriter(logFilePath, true)) {
             writer.write(logEntry + "\n");
         } catch (IOException e) {
             System.err.println("Error writing log: " + e.getMessage());
+            logEntry = logEntry.replace("{message}", e.getMessage());
         }
     }
 }

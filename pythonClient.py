@@ -4,7 +4,7 @@ import os
 import time
 from datetime import datetime
 
-def send_log_message(host, port, log_format, message=None):
+def send_log_message(host, port, message=None):
     try:
          client_ip = socket.gethostbyname(socket.gethostname())
          timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -14,14 +14,10 @@ def send_log_message(host, port, log_format, message=None):
              print("Connected to logging server. Type messages to send, or type 'exit' to quit.")
 
              if message: #for automated messages
-                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                 formatted_message = log_format.replace("{timestamp}", timestamp)
-                 formatted_message = formatted_message.replace("{client}", client_ip)
-                 formatted_message = formatted_message.replace("{message}", message)
                 
-                 client_socket.sendall(formatted_message.encode('utf-8') + b'\n')
+                 client_socket.sendall(message.encode('utf-8') + b'\n')
                  #print("Test log message sent successfully.")
-                 return formatted_message
+                 return
              
              while True:
                   message = input("Enter log message: ")
@@ -32,11 +28,11 @@ def send_log_message(host, port, log_format, message=None):
                        break
                   
                   timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                  formatted_message = log_format.replace("{timestamp}", timestamp)
-                  formatted_message = formatted_message.replace("{client}", client_ip)
-                  formatted_message = formatted_message.replace("{message}", message)
+                  #formatted_message = log_format.replace("{message}", message)
+                  #formatted_message = formatted_message.replace("{client}", client_ip)
+                  #formatted_message = formatted_message.replace("{message}", message)
                   
-                  client_socket.sendall(formatted_message.encode('utf-8') + b'\n')
+                  client_socket.sendall(message.encode('utf-8') + b'\n')
                   print("Formatted log message sent successfully.")
                   
     except Exception as e:
@@ -49,10 +45,10 @@ def verify_log_entry(log_file, expected_message):
             return expected_message in logs
     return False
 
-def test_logging_service(host, port, log_format, log_file):
+def test_logging_service(host, port, log_file):
     test_message = "Automated test log entry"
     print("Starting automated test...")
-    expected_log = send_log_message(host, port, log_format, test_message)
+    expected_log = send_log_message(host, port, test_message)
     time.sleep(2)  # Allow server time to process the message
     
     if expected_log and verify_log_entry(log_file, expected_log):
@@ -60,26 +56,26 @@ def test_logging_service(host, port, log_format, log_file):
     else:
         print("Test failed: Log entry not found.")
 
-def test_rate_limit(host, port, log_format, request_count, delay_between_requests):
+def test_rate_limit(host, port, request_count, delay_between_requests):
     print("Starting rate limit test...")
     for i in range(request_count):
-        send_log_message(host, port, log_format, f"Test message {i+1}")
+        send_log_message(host, port, f"Test message {i+1}")
         time.sleep(delay_between_requests)
     print("Rate limit test completed. Check server logs to verify rate limiting behavior.")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 4:
-        print("Usage: python test_client.py <host> <port> <logFormat> [auto/rate (optional)]")
+    if len(sys.argv) < 3:
+        print("Usage: python test_client.py <host> <port> [auto/rate (optional)]")
         sys.exit(1)
         
     host = sys.argv[1]
     port = int(sys.argv[2])
-    log_format = sys.argv[3]
+    #log_format = sys.argv[3]
     log_file = "log.txt"
 
-    if len(sys.argv) > 4 and sys.argv[4].lower() == "auto":
-        test_logging_service(host, port, log_format, log_file)
-    elif len(sys.argv) > 4 and sys.argv[4].lower() == "rate":
-        test_rate_limit(host, port, log_format, request_count=10, delay_between_requests=0.01)
+    if len(sys.argv) > 3 and sys.argv[3].lower() == "auto":
+        test_logging_service(host, port, log_file)
+    elif len(sys.argv) > 3 and sys.argv[3].lower() == "rate":
+        test_rate_limit(host, port, request_count=10, delay_between_requests=0.01)
     else:
-        send_log_message(host, port, log_format)
+        send_log_message(host, port)
