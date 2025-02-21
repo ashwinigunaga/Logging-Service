@@ -34,7 +34,7 @@ public class LoggingService{
 
     private static void handleClient(Socket clientSocket, String logFilePath, String logFormat) {
         String clientAddress = clientSocket.getInetAddress().getHostAddress();
-    
+        logMessage(clientAddress, "Client " + clientAddress + " connected.", logFilePath, logFormat);
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
             String message;
             while ((message = reader.readLine()) != null) {
