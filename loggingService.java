@@ -1,3 +1,8 @@
+//Student 1 Name : Jyot Shah
+//Student 2 Name : Ashwini Gunaga
+//File Name : loggingService.java
+//date : 21/02/2025
+
 import java.io.*;
 import java.net.*;
 import java.text.SimpleDateFormat;
@@ -5,10 +10,15 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.*;
 
+//Function name: LoggingService 
+//Function description: This server listens on a specified port and logs messages from clients .
+
 public class LoggingService{
-    private static final int THREAD_POOL_SIZE = 10;
-    private static final long GLOBAL_RATE_LIMIT = 1_00; // 1 log 0.1 second
+    private static final int THREAD_POOL_SIZE = 10; // Maximum number of threads
+    private static final long GLOBAL_RATE_LIMIT = 1_00; // Rate limit: 1 log per 0.1 second
     private static final Map<String, Long> clientTimestamps = new ConcurrentHashMap<>();
+
+    //Main method to start the logging service.
     public static void main(String[] args) {
         if (args.length < 3) {
             System.out.println("Usage: java LoggingService <port> <logFilePath> <logFormat>");
@@ -31,7 +41,7 @@ public class LoggingService{
         }
     }   
 
-
+// Handles client connections and logs messages.
     private static void handleClient(Socket clientSocket, String logFilePath, String logFormat) {
         String clientAddress = clientSocket.getInetAddress().getHostAddress();
         logMessage(clientAddress, "INFO", "Client " + clientAddress + " connected.", logFilePath, logFormat);
@@ -55,11 +65,13 @@ public class LoggingService{
         }
     }
 
+// Enforces a global rate limit for logging.
     private static boolean allowGlobalRateLimit(String clientIp) {
         long now = System.currentTimeMillis();
         return clientTimestamps.merge(clientIp, now, (oldVal, newVal) -> (newVal - oldVal) > GLOBAL_RATE_LIMIT ? newVal : oldVal) == now;
     }
 
+// Logs a message to the specified log file.
     private static void logMessage(String clientAddress, String logLevel, String message, String logFilePath, String logFormat) {
         String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         String logEntry;
