@@ -34,21 +34,21 @@ public class LoggingService{
 
     private static void handleClient(Socket clientSocket, String logFilePath, String logFormat) {
         String clientAddress = clientSocket.getInetAddress().getHostAddress();
-        logMessage(clientAddress, "Client " + clientAddress + " connected.", logFilePath, logFormat);
+        logMessage(clientAddress, "INFO", "Client " + clientAddress + " connected.", logFilePath, logFormat);
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
             String message;
             while ((message = reader.readLine()) != null) {
                 if ("CLIENT_DISCONNECT".equals(message)) {
                     //System.out.println("Client " + clientAddress + " disconnected.");
-                    logMessage(clientAddress, "Client " + clientAddress + " disconnected.", logFilePath, logFormat);
+                    logMessage(clientAddress, "INFO", "Client " + clientAddress + " disconnected.", logFilePath, logFormat);
                     break;
                 }
                 if (allowGlobalRateLimit(clientAddress)) {
-                   // System.out.println("within limit");
-                    logMessage(clientAddress, message, logFilePath, logFormat);
-                } else {
+                    logMessage(clientAddress, "INFO", message, logFilePath, logFormat);
+                } 
+                else {
                     //System.out.println("Rate limit exceeded for client: " + clientAddress);
-                    logMessage(clientAddress, "Rate limit exceeded for client: " + clientAddress, logFilePath, logFormat);
+                    logMessage(clientAddress, "WARNING", "Rate limit exceeded for client: " + clientAddress, logFilePath, logFormat);
                 }            }
         } catch (IOException e) {
             System.err.println("Error handling client: " + e.getMessage());
@@ -60,22 +60,20 @@ public class LoggingService{
         return clientTimestamps.merge(clientIp, now, (oldVal, newVal) -> (newVal - oldVal) > GLOBAL_RATE_LIMIT ? newVal : oldVal) == now;
     }
 
-    private static void logMessage(String clientAddress, String message, String logFilePath, String logFormat) {
+    private static void logMessage(String clientAddress, String logLevel, String message, String logFilePath, String logFormat) {
         String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         String logEntry;
         logEntry = logFormat.replace("{timestamp}", timestamp)
                             .replace("{client}", clientAddress)
+                            .replace("{level}", logLevel)
                             .replace("{message}", message);
-
-                            
-
-        //System.out.println(logEntry);
         
         try (FileWriter writer = new FileWriter(logFilePath, true)) {
             writer.write(logEntry + "\n");
         } catch (IOException e) {
             System.err.println("Error writing log: " + e.getMessage());
-            logEntry = logEntry.replace("{message}", e.getMessage());
+            logEntry = logEntry.replace("{message}", e.getMessage())
+                                .replace("{level}","ERROR");
         }
     }
 }
