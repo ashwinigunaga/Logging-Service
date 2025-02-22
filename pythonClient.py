@@ -1,10 +1,10 @@
-#   PROJECT       : SENG204O - Assignment #3
+#   PROJECT        : SENG204O - Assignment #3
 #   STUDENT 1 NAME : Jyot Shah
 #   STUDENT 2 NAME : Ashwini Gunaga
-#   STUDENT 1 ID : 8871717
-#   STUDENT 2 ID : 8888180
-#   FILE NAME : pythonClient.py
-#   DATE : 21/02/2025
+#   STUDENT 1 ID   : 8871717
+#   STUDENT 2 ID   : 8888180
+#   FILE NAME      : pythonClient.py
+#   DATE           : 21/02/2025
 
 import socket
 import sys
@@ -55,10 +55,9 @@ def send_log_message(client_socket, message=None):
 # Function Parameters :
 #   host - The IP address of the server.
 #   port - The port number of the logging server.
-#   log_file - The file path for logging (not used in function).
 # Function Returns : None 
 
-def test_logging_service(host, port, log_file):
+def test_logging_service(host, port):
     test_message = "Automated test log entry"
     print("Starting automated test...")
     client_socket = connect_to_server(host, port) # Establishes connection
@@ -100,7 +99,7 @@ if __name__ == "__main__":
     
     # Checks for optional test mode
     if len(sys.argv) > 3 and sys.argv[3].lower() == "auto":
-        test_logging_service(host, port, log_file)
+        test_logging_service(host, port)
     elif len(sys.argv) > 3 and sys.argv[3].lower() == "rate":
         test_rate_limit(host, port, count=100)
     else:

@@ -1,10 +1,10 @@
-    // PROJECT       : SENG204O - Assignment #3
+    // PROJECT        : SENG204O - Assignment #3
     // STUDENT 1 NAME : Jyot Shah
     // STUDENT 2 NAME : Ashwini Gunaga
-    // STUDENT 1 ID : 8871717
-    // STUDENT 2 ID : 8888180
-    // FILE NAME : loggingService.java
-    // DATE : 21/02/2025
+    // STUDENT 1 ID   : 8871717
+    // STUDENT 2 ID   : 8888180
+    // FILE NAME      : loggingService.java
+    // DATE           : 21/02/2025
 
     import java.io.*;
     import java.net.*;
@@ -54,7 +54,7 @@
         //  Function name : handleClient
         //  Function description : Handles client connections and logs messages.
         //  Function Parameters :
-        //      Socket clientSocket- The client socket connection.
+        //      Socket clientSocket - The client socket connection.
         //      String logFilePath - The file path where logs should be stored.
         //      String logFormat - The format of the logs.
         //  Function Returns : void
@@ -89,10 +89,10 @@
         //  Function description : Logs a message to the specified log file.
         //  Function Parameters :
         //      String clientAddress - The IP address of the client which sends the log message.
-        //      String logLevel      - The level of the log message (INFO, WARNING, ERROR, etc.).
-        //      String message       - The message content.
-        //      String logFilePath   - The file path where logs should be saved.
-        //      String logFormat     - The format for logging messages.
+        //      String logLevel - The level of the log message (INFO, WARNING, ERROR, etc.).
+        //      String message - The message content.
+        //      String logFilePath - The file path where logs should be saved.
+        //      String logFormat - The format for logging messages.
         //  Function Returns : void
 
         private static void logMessage(String clientAddress, String logLevel, String message, String logFilePath, String logFormat) {
@@ -111,11 +111,21 @@
         }
     }
 
+    //  Class name : LogBucket
+    //  Class description : Implements a token bucket rate-limiting mechanism for log messages.
+
     class LogBucket {
-    private int noOfLogs;
-    private final int maxLogs;
-    private final long refillIntervalMs;
-    private long lastRefillTime;
+    private int noOfLogs; // Current available log tokens
+    private final int maxLogs; // Maximum number of log tokens
+    private final long refillIntervalMs; // Time interval
+    private long lastRefillTime;  // Timestamp 
+
+    //  Function name : LogBucket
+    //  Function description : Starts the log bucket with a maximum token limit.
+    //  Function Parameters :
+    //      maxLogs - Maximum number of logs allowed within the time interval.
+    //      refillIntervalMs - Time interval after which logs are refilled.
+    //  Function Returns : None
 
     public LogBucket(int maxLogs, long refillIntervalMs) {
         this.maxLogs = maxLogs;
@@ -124,10 +134,20 @@
         this.lastRefillTime = System.currentTimeMillis();
     }
 
+    //  Function name : consumeToken
+    //  Function description : Keeps track of number of logs recieved from client.
+    //  Function Parameters : None
+    //  Function Returns : Boolean
+
     public synchronized boolean consumeToken() {
         resetLogLimit();
         return noOfLogs > 0 && (noOfLogs-- > 0);
     }
+
+    //  Function name : resetLogLimit
+    //  Function description : Checks the limit and refills
+    //  Function Parameters : None
+    //  Function Returns : None
 
     private void resetLogLimit() {
         long now = System.currentTimeMillis();
