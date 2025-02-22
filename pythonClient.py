@@ -1,7 +1,10 @@
-#Student 1 Name : Jyot Shah
-#Student 2 Name : Ashwini Gunaga
-#File Name : pythonClient.py
-#date : 21/02/2025
+#   PROJECT       : SENG204O - Assignment #3
+#   STUDENT 1 NAME : Jyot Shah
+#   STUDENT 2 NAME : Ashwini Gunaga
+#   STUDENT 1 ID : 8871717
+#   STUDENT 2 ID : 
+#   FILE NAME : pythonClient.py
+#   DATE : 21/02/2025
 
 import socket
 import sys
@@ -9,8 +12,13 @@ import os
 import time
 from datetime import datetime
 
-# Function: connect_to_server
-# Function to establish a connection to the logging server
+# Function name : connect_to_server
+# Function description : Function to establish a connection to the logging server.
+# Function Parameters :
+#   host - The IP address of the server.
+#   port - The port number of the logging server.
+# Function Returns : None or client_socket
+
 def connect_to_server(host, port):
     try:
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -21,8 +29,13 @@ def connect_to_server(host, port):
         print(f"[ERROR] Unable to connect: {e}")
         return None
 
-# Function: send_log_message
-# Function to automate sending a test log message
+# Function name : send_log_message
+# Function description : Function to automate sending a test log message.
+# Function Parameters :
+#   client_socket - The connected client socket.
+#   message - The log message to send.
+# Function Returns : None 
+
 def send_log_message(client_socket, message=None):
     try:  
              if message: #for automated messages
@@ -37,8 +50,14 @@ def send_log_message(client_socket, message=None):
     except Exception as e:
         print(f"Error sending Log Message: {e}")
 
-# Function: test_logging_service
-# Function to automate sending a test log message
+# Function name : test_logging_service
+# Function description : Function to automate sending a test log message.
+# Function Parameters :
+#   host - The IP address of the server.
+#   port - The port number of the logging server.
+#   log_file - The file path for logging (not used in function).
+# Function Returns : None 
+
 def test_logging_service(host, port, log_file):
     test_message = "Automated test log entry"
     print("Starting automated test...")
@@ -48,8 +67,14 @@ def test_logging_service(host, port, log_file):
         time.sleep(2) # Waits before exiting
         send_log_message(client_socket, "exit")
     
-# Function: test_rate_limit
-# Function to test server's rate-limiting mechanism
+# Function name : test_rate_limit
+# Function description : Function to test server's rate-limiting feature
+# Function Parameters :
+#   host - The IP address of the server.
+#   port - The port number of the logging server.
+#   count - The number of messages to send.
+#   delay - The delay (in seconds) between each message.
+# Function Returns : None 
 def test_rate_limit(host, port, count, delay):
     print("Starting rate limit test...")
     client_socket = connect_to_server(host, port)  # Establishes connection
@@ -60,8 +85,10 @@ def test_rate_limit(host, port, count, delay):
         print("Rate limit test completed. Check server logs to verify rate limiting behavior.")
         send_log_message(client_socket, "exit") # Closes connection
 
-# Function: main
-# Main program 
+# Function name : main
+# Function description : Main program 
+# Function Parameters : None
+# Function Returns : None 
 if __name__ == "__main__":
     # Checks if the correct number of arguments are provided
     if len(sys.argv) < 3:
