@@ -64,7 +64,7 @@ def test_logging_service(host, port, log_file):
     client_socket = connect_to_server(host, port) # Establishes connection
     if client_socket:
         send_log_message(client_socket, test_message) # Send test message
-        time.sleep(2) # Waits before exiting
+        time.sleep(1) # Waits before exiting
         send_log_message(client_socket, "exit")
     
 # Function name : test_rate_limit
@@ -73,15 +73,13 @@ def test_logging_service(host, port, log_file):
 #   host - The IP address of the server.
 #   port - The port number of the logging server.
 #   count - The number of messages to send.
-#   delay - The delay (in seconds) between each message.
 # Function Returns : None 
-def test_rate_limit(host, port, count, delay):
+def test_rate_limit(host, port, count):
     print("Starting rate limit test...")
     client_socket = connect_to_server(host, port)  # Establishes connection
     if client_socket:
         for i in range(count):
             send_log_message(client_socket, f"Test message {i+1}")  # Sends multiple messages
-            time.sleep(delay)# Waits before exiting
         print("Rate limit test completed. Check server logs to verify rate limiting behavior.")
         send_log_message(client_socket, "exit") # Closes connection
 
@@ -98,14 +96,13 @@ if __name__ == "__main__":
     # Reads command-line arguments
     host = sys.argv[1]
     port = int(sys.argv[2])
-    #log_format = sys.argv[3]
-    log_file = "log.txt"
+
     
     # Checks for optional test mode
     if len(sys.argv) > 3 and sys.argv[3].lower() == "auto":
         test_logging_service(host, port, log_file)
     elif len(sys.argv) > 3 and sys.argv[3].lower() == "rate":
-        test_rate_limit(host, port, count=100, delay=0.01)
+        test_rate_limit(host, port, count=100)
     else:
         # Starts interactive mode for sending manual log messages
         client_socket = connect_to_server(host, port)

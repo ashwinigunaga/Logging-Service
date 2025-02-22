@@ -20,8 +20,8 @@
 
     public class LoggingService{
         private static final int THREAD_POOL_SIZE = 10; // Maximum number of threads
-        private static final long GLOBAL_RATE_LIMIT = 1_00; // Rate limit: 1 log per 0.1 second
-        private static final Map<String, Long> clientTimestamps = new ConcurrentHashMap<>();
+        private static final int LOG_LIMIT = 40;
+        private static final long REFILL_INTERVAL_MS = 1000;
 
         //  Function name: main
         //  Function description: Main method to start the logging service.
@@ -61,36 +61,28 @@
 
         private static void handleClient(Socket clientSocket, String logFilePath, String logFormat) {
             String clientAddress = clientSocket.getInetAddress().getHostAddress();
+            LogBucket logBucket = new LogBucket(LOG_LIMIT, REFILL_INTERVAL_MS);
             logMessage(clientAddress, "INFO", "Client " + clientAddress + " connected.", logFilePath, logFormat);
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
                 String message;
                 while ((message = reader.readLine()) != null) {
                     if ("CLIENT_DISCONNECT".equals(message)) {
-                        //System.out.println("Client " + clientAddress + " disconnected.");
+                        //Log a message when the client disconnects
                         logMessage(clientAddress, "INFO", "Client " + clientAddress + " disconnected.", logFilePath, logFormat);
                         break;
                     }
-                    if (allowGlobalRateLimit(clientAddress)) {
+                    if (logBucket.consumeToken()) { //check for rate limit
                         logMessage(clientAddress, "INFO", message, logFilePath, logFormat);
                     } 
                     else {
-                        //System.out.println("Rate limit exceeded for client: " + clientAddress);
                         logMessage(clientAddress, "WARNING", "Rate limit exceeded for client: " + clientAddress, logFilePath, logFormat);
+                        break;
                     }            }
             } catch (IOException e) {
                 System.err.println("Error handling client: " + e.getMessage());
+                logMessage(clientAddress, "ERROR", e.getMessage(), logFilePath, logFormat);
+
             }
-        }
-
-        //  Function name : handleClient
-        //  Function description : Applies a global rate limit for logging.
-        //  Function Parameters :
-        //      String clientIp - The IP address of the client.
-        //  Function Returns : boolean
-
-        private static boolean allowGlobalRateLimit(String clientIp) {
-            long now = System.currentTimeMillis();
-            return clientTimestamps.merge(clientIp, now, (oldVal, newVal) -> (newVal - oldVal) > GLOBAL_RATE_LIMIT ? newVal : oldVal) == now;
         }
 
         //  Function name : logmessage
@@ -115,8 +107,33 @@
                 writer.write(logEntry + "\n");
             } catch (IOException e) {
                 System.err.println("Error writing log: " + e.getMessage());
-                logEntry = logEntry.replace("{message}", e.getMessage())
-                                    .replace("{level}","ERROR");
             }
         }
     }
+
+    class LogBucket {
+    private int noOfLogs;
+    private final int maxLogs;
+    private final long refillIntervalMs;
+    private long lastRefillTime;
+
+    public LogBucket(int maxLogs, long refillIntervalMs) {
+        this.maxLogs = maxLogs;
+        this.refillIntervalMs = refillIntervalMs;
+        this.noOfLogs = maxLogs;
+        this.lastRefillTime = System.currentTimeMillis();
+    }
+
+    public synchronized boolean consumeToken() {
+        resetLogLimit();
+        return noOfLogs > 0 && (noOfLogs-- > 0);
+    }
+
+    private void resetLogLimit() {
+        long now = System.currentTimeMillis();
+        if (now - lastRefillTime > refillIntervalMs) {
+            noOfLogs = Math.min(maxLogs, noOfLogs + (int) ((now - lastRefillTime) / refillIntervalMs));
+            lastRefillTime = now;
+        }
+    }
+}
